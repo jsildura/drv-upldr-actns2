@@ -1,0 +1,92 @@
+name: Remote Upload to Drive
+
+on:
+  repository_dispatch:
+    types: [remote_upload]  # extension triggers this
+  workflow_dispatch:        # manual run for testing
+    inputs:
+      url:
+        description: "Remote file URL"
+        required: true
+      filename:
+        description: "Target filename"
+        required: false
+      accountKey:
+        description: "Which refresh token secret to use (e.g., DRIVE_REFRESH_TOKEN_MAIN)"
+        required: true
+      parentKey:
+        description: "Optional parent folder secret key (e.g., DRIVE_PARENT_FOLDER_MAIN)"
+        required: false
+      correlationId:
+        description: "Client-supplied correlation id"
+        required: true
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+  GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+
+jobs:
+  upload:
+    name: Upload ${{ github.event.client_payload.filename || inputs.filename || 'file' }}
+    runs-on: ubuntu-latest
+
+    # Put correlation id in run name for easy lookup
+    run-name: >
+      Remote upload ${{ github.event.client_payload.correlationId || inputs.correlationId }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Resolve inputs
+        id: args
+        run: |
+          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            echo "url=${{ github.event.client_payload.url }}" >> $GITHUB_OUTPUT
+            echo "filename=${{ github.event.client_payload.filename }}" >> $GITHUB_OUTPUT
+            echo "accountKey=${{ github.event.client_payload.accountKey }}" >> $GITHUB_OUTPUT
+            echo "parentKey=${{ github.event.client_payload.parentKey }}" >> $GITHUB_OUTPUT
+          else
+            echo "url=${{ inputs.url }}" >> $GITHUB_OUTPUT
+            echo "filename=${{ inputs.filename }}" >> $GITHUB_OUTPUT
+            echo "accountKey=${{ inputs.accountKey }}" >> $GITHUB_OUTPUT
+            echo "parentKey=${{ inputs.parentKey }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Export refresh token env
+        run: |
+          # accountKey is the *name* of a secret containing the refresh token
+          # parentKey is optional secret with a folder id
+          echo "Using accountKey=${{ steps.args.outputs.accountKey }}"
+          echo "Using parentKey=${{ steps.args.outputs.parentKey }}"
+          echo "${{ steps.args.outputs.accountKey }}=${{ secrets[steps.args.outputs.accountKey] }}" >> $GITHUB_ENV
+          if [ "${{ steps.args.outputs.parentKey }}" != "" ]; then
+            echo "${{ steps.args.outputs.parentKey }}=${{ secrets[steps.args.outputs.parentKey] }}" >> $GITHUB_ENV
+          fi
+
+      - name: Run upload script
+        run: |
+          node scripts/upload.js \
+            --url "${{ steps.args.outputs.url }}" \
+            --filename "${{ steps.args.outputs.filename }}" \
+            --refreshTokenName "${{ steps.args.outputs.accountKey }}" \
+            --parentKey "${{ steps.args.outputs.parentKey }}"
+
+      - name: Upload result artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: result
+          path: out/result.json
+          if-no-files-found: error

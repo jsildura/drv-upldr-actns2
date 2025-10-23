@@ -1,0 +1,16 @@
+{
+  "name": "github-actions-remote-uploader",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "GitHub Actions workflow script for streaming remote URLs to Google Drive",
+  "scripts": {
+    "test": "node scripts/upload.js --url https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf --filename test.pdf --refreshTokenName DRIVE_REFRESH_TOKEN_MAIN"
+  },
+  "dependencies": {
+    "undici": "^6.19.8"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
