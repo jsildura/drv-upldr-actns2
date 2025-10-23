@@ -33,8 +33,17 @@ const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const REFRESH_TOKEN = process.env[refreshTokenName]; // e.g., DRIVE_REFRESH_TOKEN_MAIN
 const PARENT_FOLDER = parentKey ? process.env[parentKey] : undefined;
 
+console.log("DEBUG: Script received:");
+console.log(`  refreshTokenName arg: ${refreshTokenName}`);
+console.log(`  GOOGLE_CLIENT_ID length: ${GOOGLE_CLIENT_ID?.length || 0}`);
+console.log(`  GOOGLE_CLIENT_SECRET length: ${GOOGLE_CLIENT_SECRET?.length || 0}`);
+console.log(`  REFRESH_TOKEN (from env[${refreshTokenName}]) length: ${REFRESH_TOKEN?.length || 0}`);
+
 if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !REFRESH_TOKEN) {
   console.error("Missing Google OAuth secrets or refresh token env.");
+  console.error(`  GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID ? 'EXISTS' : 'MISSING'}`);
+  console.error(`  GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET ? 'EXISTS' : 'MISSING'}`);
+  console.error(`  REFRESH_TOKEN: ${REFRESH_TOKEN ? 'EXISTS' : 'MISSING'}`);
   process.exit(1);
 }
 
