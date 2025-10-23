@@ -65,18 +65,11 @@ jobs:
             echo "parentKey=${{ inputs.parentKey }}" >> $GITHUB_OUTPUT
           fi
 
-      - name: Export refresh token env
-        run: |
-          # accountKey is the *name* of a secret containing the refresh token
-          # parentKey is optional secret with a folder id
-          echo "Using accountKey=${{ steps.args.outputs.accountKey }}"
-          echo "Using parentKey=${{ steps.args.outputs.parentKey }}"
-          echo "${{ steps.args.outputs.accountKey }}=${{ secrets[steps.args.outputs.accountKey] }}" >> $GITHUB_ENV
-          if [ "${{ steps.args.outputs.parentKey }}" != "" ]; then
-            echo "${{ steps.args.outputs.parentKey }}=${{ secrets[steps.args.outputs.parentKey] }}" >> $GITHUB_ENV
-          fi
-
       - name: Run upload script
+        env:
+          # Export all possible refresh tokens
+          DRIVE_REFRESH_TOKEN_MAIN: ${{ secrets.DRIVE_REFRESH_TOKEN_MAIN }}
+          DRIVE_PARENT_FOLDER_MAIN: ${{ secrets.DRIVE_PARENT_FOLDER_MAIN }}
         run: |
           node scripts/upload.js \
             --url "${{ steps.args.outputs.url }}" \
