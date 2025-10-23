@@ -38,6 +38,10 @@ console.log(`  refreshTokenName arg: ${refreshTokenName}`);
 console.log(`  GOOGLE_CLIENT_ID length: ${GOOGLE_CLIENT_ID?.length || 0}`);
 console.log(`  GOOGLE_CLIENT_SECRET length: ${GOOGLE_CLIENT_SECRET?.length || 0}`);
 console.log(`  REFRESH_TOKEN (from env[${refreshTokenName}]) length: ${REFRESH_TOKEN?.length || 0}`);
+console.log("DEBUG: All DRIVE_ env vars:");
+Object.keys(process.env).filter(k => k.startsWith('DRIVE_')).forEach(k => {
+  console.log(`  ${k}: length ${process.env[k]?.length || 0}`);
+});
 
 if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !REFRESH_TOKEN) {
   console.error("Missing Google OAuth secrets or refresh token env.");
