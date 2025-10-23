@@ -70,9 +70,12 @@ jobs:
           if [ "$ACCOUNT_KEY" = "DRIVE_REFRESH_TOKEN_MAIN" ]; then
             echo "refresh_token=${{ secrets.DRIVE_REFRESH_TOKEN_MAIN }}" >> $GITHUB_OUTPUT
             echo "parent_folder=${{ secrets.DRIVE_PARENT_FOLDER_MAIN }}" >> $GITHUB_OUTPUT
-          # elif [ "$ACCOUNT_KEY" = "DRIVE_REFRESH_TOKEN_ACCOUNT2" ]; then
-          #   echo "refresh_token=${{ secrets.DRIVE_REFRESH_TOKEN_ACCOUNT2 }}" >> $GITHUB_OUTPUT
-          #   echo "parent_folder=${{ secrets.DRIVE_PARENT_FOLDER_ACCOUNT2 }}" >> $GITHUB_OUTPUT
+          elif [ "$ACCOUNT_KEY" = "DRIVE_REFRESH_TOKEN_ACCOUNT2" ]; then
+            echo "refresh_token=${{ secrets.DRIVE_REFRESH_TOKEN_ACCOUNT2 }}" >> $GITHUB_OUTPUT
+            echo "parent_folder=${{ secrets.DRIVE_PARENT_FOLDER_ACCOUNT2 }}" >> $GITHUB_OUTPUT
+          # elif [ "$ACCOUNT_KEY" = "DRIVE_REFRESH_TOKEN_ACCOUNT3" ]; then
+          #   echo "refresh_token=${{ secrets.DRIVE_REFRESH_TOKEN_ACCOUNT3 }}" >> $GITHUB_OUTPUT
+          #   echo "parent_folder=${{ secrets.DRIVE_PARENT_FOLDER_ACCOUNT3 }}" >> $GITHUB_OUTPUT
           else
             echo "::error::Unknown account key: $ACCOUNT_KEY"
             exit 1
