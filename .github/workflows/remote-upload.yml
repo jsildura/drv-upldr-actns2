@@ -50,9 +50,32 @@ jobs:
           if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
             echo "url=${{ github.event.client_payload.url }}" >> $GITHUB_OUTPUT
             echo "filename=${{ github.event.client_payload.filename }}" >> $GITHUB_OUTPUT
+            echo "accountKey=${{ github.event.client_payload.accountKey }}" >> $GITHUB_OUTPUT
+            echo "parentKey=${{ github.event.client_payload.parentKey }}" >> $GITHUB_OUTPUT
           else
             echo "url=${{ inputs.url }}" >> $GITHUB_OUTPUT
             echo "filename=${{ inputs.filename }}" >> $GITHUB_OUTPUT
+            echo "accountKey=DRIVE_REFRESH_TOKEN_MAIN" >> $GITHUB_OUTPUT
+            echo "parentKey=" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Map account key to secret
+        id: secrets
+        run: |
+          ACCOUNT_KEY="${{ steps.args.outputs.accountKey }}"
+          echo "Account key requested: $ACCOUNT_KEY"
+          
+          # Map account key string to actual secret
+          # Add more mappings here for additional accounts
+          if [ "$ACCOUNT_KEY" = "DRIVE_REFRESH_TOKEN_MAIN" ]; then
+            echo "refresh_token=${{ secrets.DRIVE_REFRESH_TOKEN_MAIN }}" >> $GITHUB_OUTPUT
+            echo "parent_folder=${{ secrets.DRIVE_PARENT_FOLDER_MAIN }}" >> $GITHUB_OUTPUT
+          # elif [ "$ACCOUNT_KEY" = "DRIVE_REFRESH_TOKEN_ACCOUNT2" ]; then
+          #   echo "refresh_token=${{ secrets.DRIVE_REFRESH_TOKEN_ACCOUNT2 }}" >> $GITHUB_OUTPUT
+          #   echo "parent_folder=${{ secrets.DRIVE_PARENT_FOLDER_ACCOUNT2 }}" >> $GITHUB_OUTPUT
+          else
+            echo "::error::Unknown account key: $ACCOUNT_KEY"
+            exit 1
           fi
 
       - name: Run upload script
@@ -60,9 +83,9 @@ jobs:
           # OAuth credentials
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-          # Refresh token (hardcoded for now since GitHub masks dynamic input)
-          REFRESH_TOKEN: ${{ secrets.DRIVE_REFRESH_TOKEN_MAIN }}
-          PARENT_FOLDER: ${{ secrets.DRIVE_PARENT_FOLDER_MAIN }}
+          # Mapped refresh token and folder from previous step
+          REFRESH_TOKEN: ${{ steps.secrets.outputs.refresh_token }}
+          PARENT_FOLDER: ${{ steps.secrets.outputs.parent_folder }}
         run: |
           node scripts/upload.js \
             --url "${{ steps.args.outputs.url }}" \
