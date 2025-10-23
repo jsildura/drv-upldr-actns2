@@ -1,5 +1,9 @@
 name: Remote Upload to Drive
 
+# Put correlation id in run name for easy lookup
+run-name: >
+  Remote upload ${{ github.event.client_payload.correlationId || inputs.correlationId }}
+
 on:
   repository_dispatch:
     types: [remote_upload]  # extension triggers this
@@ -33,10 +37,6 @@ jobs:
   upload:
     name: Upload ${{ github.event.client_payload.filename || inputs.filename || 'file' }}
     runs-on: ubuntu-latest
-
-    # Put correlation id in run name for easy lookup
-    run-name: >
-      Remote upload ${{ github.event.client_payload.correlationId || inputs.correlationId }}
 
     steps:
       - name: Checkout
