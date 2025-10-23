@@ -11,11 +11,9 @@ function arg(name, def = undefined) {
 
 const url = arg("url");
 let filename = arg("filename");
-const refreshTokenName = arg("refreshTokenName");
-const parentKey = arg("parentKey");
 
-if (!url || !refreshTokenName) {
-  console.error("Missing required args: --url and --refreshTokenName");
+if (!url) {
+  console.error("Missing required arg: --url");
   process.exit(1);
 }
 
@@ -30,18 +28,8 @@ if (!filename) {
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-const REFRESH_TOKEN = process.env[refreshTokenName]; // e.g., DRIVE_REFRESH_TOKEN_MAIN
-const PARENT_FOLDER = parentKey ? process.env[parentKey] : undefined;
-
-console.log("DEBUG: Script received:");
-console.log(`  refreshTokenName arg: ${refreshTokenName}`);
-console.log(`  GOOGLE_CLIENT_ID length: ${GOOGLE_CLIENT_ID?.length || 0}`);
-console.log(`  GOOGLE_CLIENT_SECRET length: ${GOOGLE_CLIENT_SECRET?.length || 0}`);
-console.log(`  REFRESH_TOKEN (from env[${refreshTokenName}]) length: ${REFRESH_TOKEN?.length || 0}`);
-console.log("DEBUG: All DRIVE_ env vars:");
-Object.keys(process.env).filter(k => k.startsWith('DRIVE_')).forEach(k => {
-  console.log(`  ${k}: length ${process.env[k]?.length || 0}`);
-});
+const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
+const PARENT_FOLDER = process.env.PARENT_FOLDER;
 
 if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !REFRESH_TOKEN) {
   console.error("Missing Google OAuth secrets or refresh token env.");
@@ -123,8 +111,7 @@ async function main() {
   console.log("=== Google Drive Remote Uploader ===");
   console.log(`URL: ${url}`);
   console.log(`Filename: ${filename}`);
-  console.log(`Refresh Token: ${refreshTokenName}`);
-  if (parentKey) console.log(`Parent Folder: ${parentKey}`);
+  if (PARENT_FOLDER) console.log(`Parent Folder: ${PARENT_FOLDER}`);
   console.log("");
 
   const accessToken = await getAccessToken();

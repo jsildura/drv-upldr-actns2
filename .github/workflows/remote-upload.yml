@@ -15,15 +15,9 @@ on:
       filename:
         description: "Target filename"
         required: false
-      accountKey:
-        description: "Which refresh token secret to use (e.g., DRIVE_REFRESH_TOKEN_MAIN)"
-        required: true
-      parentKey:
-        description: "Optional parent folder secret key (e.g., DRIVE_PARENT_FOLDER_MAIN)"
-        required: false
       correlationId:
         description: "Client-supplied correlation id"
-        required: true
+        required: false
 
 permissions:
   contents: read
@@ -56,13 +50,9 @@ jobs:
           if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
             echo "url=${{ github.event.client_payload.url }}" >> $GITHUB_OUTPUT
             echo "filename=${{ github.event.client_payload.filename }}" >> $GITHUB_OUTPUT
-            echo "accountKey=${{ github.event.client_payload.accountKey }}" >> $GITHUB_OUTPUT
-            echo "parentKey=${{ github.event.client_payload.parentKey }}" >> $GITHUB_OUTPUT
           else
             echo "url=${{ inputs.url }}" >> $GITHUB_OUTPUT
             echo "filename=${{ inputs.filename }}" >> $GITHUB_OUTPUT
-            echo "accountKey=${{ inputs.accountKey }}" >> $GITHUB_OUTPUT
-            echo "parentKey=${{ inputs.parentKey }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Run upload script
@@ -70,19 +60,13 @@ jobs:
           # OAuth credentials
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-          # Export all possible refresh tokens
-          DRIVE_REFRESH_TOKEN_MAIN: ${{ secrets.DRIVE_REFRESH_TOKEN_MAIN }}
-          DRIVE_PARENT_FOLDER_MAIN: ${{ secrets.DRIVE_PARENT_FOLDER_MAIN }}
+          # Refresh token (hardcoded for now since GitHub masks dynamic input)
+          REFRESH_TOKEN: ${{ secrets.DRIVE_REFRESH_TOKEN_MAIN }}
+          PARENT_FOLDER: ${{ secrets.DRIVE_PARENT_FOLDER_MAIN }}
         run: |
-          echo "DEBUG: Checking env vars..."
-          echo "GOOGLE_CLIENT_ID present: $([ -n "$GOOGLE_CLIENT_ID" ] && echo YES || echo NO)"
-          echo "GOOGLE_CLIENT_SECRET present: $([ -n "$GOOGLE_CLIENT_SECRET" ] && echo YES || echo NO)"
-          echo "DRIVE_REFRESH_TOKEN_MAIN present: $([ -n "$DRIVE_REFRESH_TOKEN_MAIN" ] && echo YES || echo NO)"
           node scripts/upload.js \
             --url "${{ steps.args.outputs.url }}" \
-            --filename "${{ steps.args.outputs.filename }}" \
-            --refreshTokenName "${{ steps.args.outputs.accountKey }}" \
-            --parentKey "${{ steps.args.outputs.parentKey }}"
+            --filename "${{ steps.args.outputs.filename }}"
 
       - name: Upload result artifact
         uses: actions/upload-artifact@v4
