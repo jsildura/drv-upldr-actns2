@@ -67,6 +67,9 @@ jobs:
 
       - name: Run upload script
         env:
+          # OAuth credentials
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           # Export all possible refresh tokens
           DRIVE_REFRESH_TOKEN_MAIN: ${{ secrets.DRIVE_REFRESH_TOKEN_MAIN }}
           DRIVE_PARENT_FOLDER_MAIN: ${{ secrets.DRIVE_PARENT_FOLDER_MAIN }}
