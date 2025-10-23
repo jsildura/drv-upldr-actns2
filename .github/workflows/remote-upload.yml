@@ -74,6 +74,10 @@ jobs:
           DRIVE_REFRESH_TOKEN_MAIN: ${{ secrets.DRIVE_REFRESH_TOKEN_MAIN }}
           DRIVE_PARENT_FOLDER_MAIN: ${{ secrets.DRIVE_PARENT_FOLDER_MAIN }}
         run: |
+          echo "DEBUG: Checking env vars..."
+          echo "GOOGLE_CLIENT_ID present: $([ -n "$GOOGLE_CLIENT_ID" ] && echo YES || echo NO)"
+          echo "GOOGLE_CLIENT_SECRET present: $([ -n "$GOOGLE_CLIENT_SECRET" ] && echo YES || echo NO)"
+          echo "DRIVE_REFRESH_TOKEN_MAIN present: $([ -n "$DRIVE_REFRESH_TOKEN_MAIN" ] && echo YES || echo NO)"
           node scripts/upload.js \
             --url "${{ steps.args.outputs.url }}" \
             --filename "${{ steps.args.outputs.filename }}" \
