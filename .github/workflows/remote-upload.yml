@@ -26,8 +26,8 @@ jobs:
         env:
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-          DRIVE_REFRESH_TOKEN: ${{ secrets.DRIVE_REFRESH_TOKEN_MAIN }}
-          DRIVE_PARENT_FOLDER: ${{ secrets.DRIVE_PARENT_FOLDER_MAIN }}
+          REFRESH_TOKEN: ${{ secrets.DRIVE_REFRESH_TOKEN_MAIN }}
+          PARENT_FOLDER: ${{ secrets.DRIVE_PARENT_FOLDER_MAIN }}
         run: |
           node scripts/upload.js \
             --url "${{ github.event.client_payload.url }}" \
