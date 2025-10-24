@@ -28,10 +28,11 @@ jobs:
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           DRIVE_REFRESH_TOKEN: ${{ secrets.DRIVE_REFRESH_TOKEN_MAIN }}
           DRIVE_PARENT_FOLDER: ${{ secrets.DRIVE_PARENT_FOLDER_MAIN }}
-          URL: ${{ github.event.client_payload.url }}
-          FILENAME: ${{ github.event.client_payload.filename }}
-          CORRELATION_ID: ${{ github.event.client_payload.correlation_id }}
-        run: node scripts/upload.js
+        run: |
+          node scripts/upload.js \
+            --url "${{ github.event.client_payload.url }}" \
+            --filename "${{ github.event.client_payload.filename }}" \
+            --correlation-id "${{ github.event.client_payload.correlation_id }}"
 
       - name: Upload result artifact
         if: always()
