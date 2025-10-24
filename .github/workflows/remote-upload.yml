@@ -1,17 +1,15 @@
-# GitHub Actions workflow for remote uploads
 name: Remote Upload to Google Drive
 
 on:
   repository_dispatch:
     types: [remote-upload]
-  workflow_dispatch:
 
 jobs:
   upload:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -20,24 +18,51 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
+
+      - name: Download file
+        id: download
+        env:
+          URL: ${{ github.event.client_payload.url }}
+          FILENAME: ${{ github.event.client_payload.filename }}
+        run: |
+          FILENAME="${FILENAME:-downloaded_file}"
+          echo "Downloading from: $URL"
+          echo "Saving as: $FILENAME"
+          
+          # Download with curl
+          curl -L -o "$FILENAME" "$URL"
+          
+          # Get file size
+          FILE_SIZE=$(stat -f%z "$FILENAME" 2>/dev/null || stat -c%s "$FILENAME")
+          echo "Downloaded file size: $FILE_SIZE bytes"
+          echo "filename=$FILENAME" >> $GITHUB_OUTPUT
+          echo "filesize=$FILE_SIZE" >> $GITHUB_OUTPUT
 
       - name: Upload to Google Drive
+        id: upload
         env:
-          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-          REFRESH_TOKEN: ${{ secrets.DRIVE_REFRESH_TOKEN_MAIN }}
-          PARENT_FOLDER: ${{ secrets.DRIVE_PARENT_FOLDER_MAIN }}
+          REFRESH_TOKEN: ${{ secrets[github.event.client_payload.accountKey] }}
+          PARENT_FOLDER_ID: ${{ github.event.client_payload.parentFolderId || secrets[github.event.client_payload.parentKey] }}
+          CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          FILENAME: ${{ steps.download.outputs.filename }}
         run: |
-          node scripts/upload.js \
-            --url "${{ github.event.client_payload.url }}" \
-            --filename "${{ github.event.client_payload.filename }}" \
-            --correlation-id "${{ github.event.client_payload.correlation_id }}"
+          node scripts/upload.js
+
+      - name: Save result
+        if: always()
+        run: |
+          mkdir -p artifacts
+          if [ -f result.json ]; then
+            cp result.json artifacts/
+            echo "Result saved to artifacts"
+          fi
 
       - name: Upload result artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: upload-result
-          path: ./result.json
+          name: upload-result-${{ github.event.client_payload.correlationId }}
+          path: artifacts/result.json
           retention-days: 1
