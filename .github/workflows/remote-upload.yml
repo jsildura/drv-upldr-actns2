@@ -3,7 +3,7 @@ name: Remote Upload to Google Drive
 on:
   repository_dispatch:
     types: [remote-upload]
-
+    workflow_dispatch:
 jobs:
   upload:
     runs-on: ubuntu-latest
