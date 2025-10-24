@@ -47,8 +47,9 @@ jobs:
           CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           FILENAME: ${{ steps.download.outputs.filename }}
+          URL: ${{ github.event.client_payload.url }}
         run: |
-          node scripts/upload.js
+          node scripts/upload.js --url "$URL"
 
       - name: Save result
         if: always()
