@@ -43,9 +43,9 @@ jobs:
         id: upload
         env:
           REFRESH_TOKEN: ${{ secrets[github.event.client_payload.accountKey] }}
-          PARENT_FOLDER_ID: ${{ github.event.client_payload.parentFolderId || secrets[github.event.client_payload.parentKey] }}
-          CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-          CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          PARENT_FOLDER: ${{ github.event.client_payload.parentFolderId || secrets[github.event.client_payload.parentKey] }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           FILENAME: ${{ steps.download.outputs.filename }}
           URL: ${{ github.event.client_payload.url }}
         run: |
@@ -55,8 +55,8 @@ jobs:
         if: always()
         run: |
           mkdir -p artifacts
-          if [ -f result.json ]; then
-            cp result.json artifacts/
+          if [ -f out/result.json ]; then
+            cp out/result.json artifacts/result.json
             echo "Result saved to artifacts"
           fi
 
