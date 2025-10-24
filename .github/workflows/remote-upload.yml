@@ -46,10 +46,10 @@ jobs:
           PARENT_FOLDER: ${{ github.event.client_payload.parentFolderId || secrets[github.event.client_payload.parentKey] }}
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-          FILENAME: ${{ steps.download.outputs.filename }}
+          FILENAME: ${{ github.event.client_payload.filename }}
           URL: ${{ github.event.client_payload.url }}
         run: |
-          node scripts/upload.js --url "$URL"
+          node scripts/upload.js --url "$URL" --filename "$FILENAME"
 
       - name: Save result
         if: always()
