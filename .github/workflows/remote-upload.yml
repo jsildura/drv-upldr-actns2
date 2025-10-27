@@ -20,50 +20,30 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Download file
-        id: download
+      - name: Upload to Google Drive
         env:
+          # Extension sends these in client_payload
           URL: ${{ github.event.client_payload.url }}
           FILENAME: ${{ github.event.client_payload.filename }}
-        run: |
-          FILENAME="${FILENAME:-downloaded_file}"
-          echo "Downloading from: $URL"
-          echo "Saving as: $FILENAME"
-          
-          # Download with curl
-          curl -L -o "$FILENAME" "$URL"
-          
-          # Get file size
-          FILE_SIZE=$(stat -f%z "$FILENAME" 2>/dev/null || stat -c%s "$FILENAME")
-          echo "Downloaded file size: $FILE_SIZE bytes"
-          echo "filename=$FILENAME" >> $GITHUB_OUTPUT
-          echo "filesize=$FILE_SIZE" >> $GITHUB_OUTPUT
-
-      - name: Upload to Google Drive
-        id: upload
-        env:
           REFRESH_TOKEN: ${{ secrets[github.event.client_payload.accountKey] }}
           PARENT_FOLDER: ${{ github.event.client_payload.parentFolderId || secrets[github.event.client_payload.parentKey] }}
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-          FILENAME: ${{ github.event.client_payload.filename }}
-          URL: ${{ github.event.client_payload.url }}
         run: |
+          echo "Starting upload..."
+          echo "URL: $URL"
+          echo "Filename: $FILENAME"
+          echo "Target folder: $PARENT_FOLDER"
+          
+          # Run upload script (it downloads and uploads in one step)
           node scripts/upload.js --url "$URL" --filename "$FILENAME"
-
-      - name: Save result
-        if: always()
-        run: |
-          mkdir -p artifacts
-          if [ -f out/result.json ]; then
-            cp out/result.json artifacts/result.json
-            echo "Result saved to artifacts"
-          fi
+          
+          echo "Upload completed!"
 
       - name: Upload result artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: upload-result-${{ github.event.client_payload.correlationId }}
-          path: artifacts/result.json
+          name: result
+          path: out/result.json
           retention-days: 1
