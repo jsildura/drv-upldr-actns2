@@ -64,6 +64,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: upload-result-${{ github.event.client_payload.correlationId }}
+          name: result
           path: artifacts/result.json
           retention-days: 1
